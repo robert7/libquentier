@@ -2315,6 +2315,7 @@ QList<Note> LocalStorageManagerPrivate::listNotes(const LocalStorageManager::Lis
                                                   const LocalStorageManager::OrderDirection::type & orderDirection,
                                                   const QString & linkedNotebookGuid) const
 {
+    qint64 timestamp1 = QDateTime::currentMSecsSinceEpoch();
     QNDEBUG(QStringLiteral("LocalStorageManagerPrivate::listNotes: flag = ") << flag << QStringLiteral(", withResourceBinaryData = ")
             << (withResourceBinaryData ? QStringLiteral("true") : QStringLiteral("false"))
             << QStringLiteral(", linked notebook guid = ") << linkedNotebookGuid);
@@ -2393,6 +2394,13 @@ QList<Note> LocalStorageManagerPrivate::listNotes(const LocalStorageManager::Lis
             return notes;
         }
     }
+    qint64 ms = QDateTime::currentMSecsSinceEpoch() - timestamp1;
+    QNINFO(QStringLiteral("LocalStorageManagerPrivate::listNotes: flag = ")
+           << flag << QStringLiteral(", withResourceBinaryData = ")
+           << (withResourceBinaryData ? QStringLiteral("true") : QStringLiteral("false"))
+           << QStringLiteral(", linked notebook guid = ") << linkedNotebookGuid
+           << QStringLiteral(", returning ") << notes.size()
+           << QStringLiteral(" in ") << ms << QStringLiteral(" ms"));
 
     return notes;
 }
@@ -10900,6 +10908,7 @@ QList<T> LocalStorageManagerPrivate::listObjects(const LocalStorageManager::List
                                                  const LocalStorageManager::OrderDirection::type & orderDirection,
                                                  const QString & additionalSqlQueryCondition) const
 {
+    qint64 timestamp1 = QDateTime::currentMSecsSinceEpoch();
     ErrorString flagError;
     QString sqlQueryConditions = listObjectsOptionsToSqlQueryConditions<T>(flag, flagError);
     if (sqlQueryConditions.isEmpty() && !flagError.isEmpty()) {
@@ -10926,6 +10935,7 @@ QList<T> LocalStorageManagerPrivate::listObjects(const LocalStorageManager::List
     }
 
     QString queryString = listObjectsGenericSqlQuery<T>();
+
     if (!sumSqlQueryConditions.isEmpty()) {
         sumSqlQueryConditions.prepend(QStringLiteral("("));
         sumSqlQueryConditions.append(QStringLiteral(")"));
@@ -10985,8 +10995,13 @@ QList<T> LocalStorageManagerPrivate::listObjects(const LocalStorageManager::List
         objects.clear();
         return objects;
     }
-
-    QNDEBUG(QStringLiteral("found ") << objects.size() << QStringLiteral(" objects"));
+    qint64 ms = QDateTime::currentMSecsSinceEpoch() - timestamp1;
+    // this is a bit hack, but is only used for log message
+    QString mainTable = queryString.split(QStringLiteral(" ")).at(3);
+    QNINFO(QStringLiteral("Table ") << mainTable
+           << QStringLiteral(", found ") << objects.size() << QStringLiteral(" objects in ")
+           << ms << QStringLiteral(" ms")
+           << QStringLiteral(", queryString=") << queryString);
 
     return objects;
 }
