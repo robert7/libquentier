@@ -310,8 +310,8 @@ bool HTMLCleaner::Impl::convertHtml(const QString & html, const TidyOptionId out
     if (Q_UNLIKELY(reader.hasError())) {
         errorDescription = QStringLiteral("Error while trying to clean up the html after tidy-html5: ");
         errorDescription += reader.errorString();
-        QNWARNING(errorDescription << QStringLiteral("; original HTML: ") << html
-                  << QStringLiteral("\nHtml converted to XML by tidy: ") << output);
+        QNWARNING(errorDescription);
+        QNTRACE(QStringLiteral("Original HTML: ") << html << QStringLiteral("\nHtml converted to XML by tidy: ") << output);
         return false;
     }
 
